@@ -1,4 +1,5 @@
 -- SQL script to create tables in the ReviewerDB database
+
 -- Create the users table
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
@@ -17,8 +18,22 @@ CREATE TABLE tasks (
                        required_approvals INT DEFAULT 3 NOT NULL,
                        current_approvals INT DEFAULT 0 NOT NULL,
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create a trigger to update the `updated_at` column automatically
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = CURRENT_TIMESTAMP;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_tasks_updated_at
+    BEFORE UPDATE ON tasks
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Create the task_approvers table
 CREATE TABLE task_approvers (

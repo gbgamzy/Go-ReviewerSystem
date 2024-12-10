@@ -32,3 +32,44 @@ func (r *TaskRepository) MarkTaskInProgress(taskID int) error {
 	}
 	return nil
 }
+
+func (r *TaskRepository) GetTaskCreatorEmail(taskID int) (string, error) {
+	var email string
+	query := `
+		SELECT u.email
+		FROM tasks t
+		JOIN users u ON t.created_by = u.id
+		WHERE t.id = $1
+	`
+	err := r.DB.QueryRow(query, taskID).Scan(&email)
+	return email, err
+}
+
+func (r *TaskRepository) GetAllTaskPartyEmails(taskID int) ([]string, error) {
+	query := `
+		SELECT u.email
+		FROM users u
+		JOIN task_approvers ta ON u.id = ta.approver_id
+		WHERE ta.task_id = $1
+		UNION
+		SELECT u.email
+		FROM users u
+		JOIN tasks t ON u.id = t.created_by
+		WHERE t.id = $1
+	`
+	rows, err := r.DB.Query(query, taskID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var emails []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+	return emails, nil
+}

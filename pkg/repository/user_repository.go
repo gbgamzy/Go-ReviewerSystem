@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"ReviewerService/pkg/models"
 	"database/sql"
 	"fmt"
 )
@@ -31,4 +32,57 @@ func (r *UserRepository) LoginOrSignup(email, name string) (int, error) {
 
 	// User exists
 	return userID, nil
+}
+
+// Get users with search and pagination
+func (r *UserRepository) GetUsers(search string, page, limit int) ([]models.User, int, error) {
+	var users []models.User
+	offset := (page - 1) * limit
+
+	// Count total users matching the search
+	var total int
+	countQuery := `
+		SELECT COUNT(*)
+		FROM users
+		WHERE name ILIKE $1 OR email ILIKE $1
+	`
+	err := r.DB.QueryRow(countQuery, "%"+search+"%").Scan(&total)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error counting users: %v", err)
+	}
+
+	// Fetch users with pagination
+	query := `
+		SELECT id, name, email, created_at
+		FROM users
+		WHERE name ILIKE $1 OR email ILIKE $1
+		ORDER BY name ASC
+		LIMIT $2 OFFSET $3
+	`
+	rows, err := r.DB.Query(query, "%"+search+"%", limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error fetching users: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt)
+		if err != nil {
+			return nil, 0, fmt.Errorf("error scanning user: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	return users, total, nil
+}
+
+func (r *UserRepository) GetUserEmailByID(userID int) (string, error) {
+	var email string
+	query := `SELECT email FROM users WHERE id = $1`
+	err := r.DB.QueryRow(query, userID).Scan(&email)
+	if err == sql.ErrNoRows {
+		return "", fmt.Errorf("user not found")
+	}
+	return email, err
 }

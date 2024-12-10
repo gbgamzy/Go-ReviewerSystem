@@ -18,3 +18,20 @@ func (r *CommentRepository) AddComment(taskApproverID int, comment string) error
 	}
 	return nil
 }
+
+// GetTaskApproverID retrieves the ID of the task approver record for a given task and approver.
+func (r *CommentRepository) GetTaskApproverID(taskID, approverID int) (int, error) {
+	var taskApproverID int
+	query := `
+		SELECT id
+		FROM task_approvers
+		WHERE task_id = $1 AND approver_id = $2
+	`
+	err := r.DB.QueryRow(query, taskID, approverID).Scan(&taskApproverID)
+	if err == sql.ErrNoRows {
+		return 0, fmt.Errorf("no task approver found for taskID: %d and approverID: %d", taskID, approverID)
+	} else if err != nil {
+		return 0, fmt.Errorf("error retrieving task approver: %v", err)
+	}
+	return taskApproverID, nil
+}

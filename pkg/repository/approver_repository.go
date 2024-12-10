@@ -20,3 +20,14 @@ func (r *ApproverRepository) AssignApprovers(taskID int, approverIDs []int) erro
 	}
 	return nil
 }
+
+// Check if a user is an approver for a task
+func (r *ApproverRepository) IsApproverForTask(taskID, approverID int) (bool, error) {
+	query := `SELECT COUNT(*) FROM task_approvers WHERE task_id = $1 AND approver_id = $2`
+	var count int
+	err := r.DB.QueryRow(query, taskID, approverID).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking approver: %v", err)
+	}
+	return count > 0, nil
+}

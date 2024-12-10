@@ -46,3 +46,13 @@ func (r *ApprovalRepository) ApproveTask(taskID, approverID int) error {
 
 	return nil
 }
+
+func (r *ApprovalRepository) IsTaskFullyApproved(taskID int) (bool, error) {
+	var requiredApprovals, currentApprovals int
+	query := `SELECT required_approvals, current_approvals FROM tasks WHERE id = $1`
+	err := r.DB.QueryRow(query, taskID).Scan(&requiredApprovals, &currentApprovals)
+	if err != nil {
+		return false, err
+	}
+	return currentApprovals >= requiredApprovals, nil
+}
