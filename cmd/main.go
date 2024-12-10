@@ -2,14 +2,11 @@ package main
 
 import (
 	"ReviewerService/pkg/handlers"
-	//"ReviewerService/pkg/models"
 	"ReviewerService/pkg/repository"
 	"database/sql"
-	//"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	//"strconv"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
