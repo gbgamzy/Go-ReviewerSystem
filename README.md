@@ -4,6 +4,18 @@ A Go-based project for managing tasks with multi-approval workflows. This projec
 
 ---
 
+
+<img width="720" alt="Screenshot 2024-12-11 at 1 50 00 AM" src="https://github.com/user-attachments/assets/d88438dc-2db2-4076-ba9c-d5c0ba602601">
+
+
+---
+
+<img width="1440" alt="Screenshot 2024-12-11 at 1 56 34 AM" src="https://github.com/user-attachments/assets/5c29c16f-95c2-4613-8f28-93cd766ab8a5">
+
+
+
+---
+
 ## Prerequisites
 
 - **Go**: Ensure Go is installed ([Download Go](https://golang.org/dl/)).
